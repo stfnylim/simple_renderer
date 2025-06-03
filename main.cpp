@@ -1,7 +1,28 @@
+#define UNICODE
 #include <windows.h>
+#include <cstdint>
+
+const int WIDTH = 800;
+const int HEIGHT = 600;
+uint32_t framebuffer[WIDTH * HEIGHT];
+
 
 // Forward declaration of the window procedure
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+
+
+void RenderTestImage() {
+    for (int y = 0; y < HEIGHT; ++y) {
+        for (int x = 0; x < WIDTH; ++x) {
+            uint8_t r = (x * 256) / WIDTH;
+            uint8_t g = (y * 256) / HEIGHT;
+            uint8_t b = (r+g) / 2; // Simple gradient effect
+
+            framebuffer[y * WIDTH + x] = (255 << 24) | (r << 16) | (g << 8) | b;  // ARGB
+        }
+    }
+}
+
 
 // Entry point of a Windows application
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow) {
@@ -36,6 +57,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow) {
         return 0;
 
     ShowWindow(hwnd, nCmdShow);
+    RenderTestImage();  // Fill the framebuffer with test data
 
     // Run the message loop
     MSG msg = {};
@@ -55,10 +77,23 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
             PAINTSTRUCT ps;
             HDC hdc = BeginPaint(hwnd, &ps);
 
-            // Placeholder: Clear background to black
-            FillRect(hdc, &ps.rcPaint, (HBRUSH)(COLOR_WINDOW + 1));
+            BITMAPINFO bmi = {};
+            bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+            bmi.bmiHeader.biWidth = WIDTH;
+            bmi.bmiHeader.biHeight = -HEIGHT; // Negative height for top-down bitmap
+            bmi.bmiHeader.biPlanes = 1;
+            bmi.bmiHeader.biBitCount = 32;
+            bmi.bmiHeader.biCompression = BI_RGB;
 
-            // TODO: Here you would draw your rendered image
+            StretchDIBits(
+                hdc,
+                0, 0, WIDTH, HEIGHT,
+                0, 0, WIDTH, HEIGHT,
+                framebuffer,
+                &bmi,
+                DIB_RGB_COLORS,
+                SRCCOPY
+            );
 
             EndPaint(hwnd, &ps);
         }
@@ -70,3 +105,6 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
     }
     return DefWindowProc(hwnd, uMsg, wParam, lParam);
 }
+
+
+
