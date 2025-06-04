@@ -24,6 +24,7 @@ void RenderTestImage() {
 }
 
 
+
 // Entry point of a Windows application
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow) {
     const wchar_t CLASS_NAME[] = L"SimpleRendererWindow";
