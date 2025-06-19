@@ -1,6 +1,10 @@
 #define UNICODE
 #include <windows.h>
 #include <cstdint>
+#include <cstdio>
+#include <iostream>  // Add this line!
+#include <io.h>      // Add this for freopen_s
+#include <fcntl.h> 
 
 const int CWIDTH = 1920;
 const int CHEIGHT = 1080;
@@ -32,6 +36,24 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow) {
+
+    // Allocate a console for this GUI application
+    AllocConsole();
+    FILE* pCout;
+    freopen_s(&pCout, "CONOUT$", "w", stdout);
+    FILE* pCin;
+    freopen_s(&pCin, "CONIN$", "r", stdin);
+    FILE* pCerr;
+    freopen_s(&pCerr, "CONOUT$", "w", stderr);
+    std::ios::sync_with_stdio(true);
+    std::wcout.clear();
+    std::cout.clear();
+    std::wcerr.clear();
+    std::cerr.clear();
+    std::wcin.clear();
+    std::cin.clear();
+
+    std::cout << "Console allocated successfully!\n";
     const wchar_t CLASS_NAME[] = L"SimpleRendererWindow";
     
     // Allocate framebuffer dynamically
@@ -47,7 +69,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow) {
     
     // Create the window
     HWND hwnd = CreateWindowEx(0, CLASS_NAME, L"My CPU Renderer", 
-        WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 800, 600,
+        WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, CWIDTH, CHEIGHT,
         NULL, NULL, hInstance, NULL);
     
     if (hwnd == NULL) {
